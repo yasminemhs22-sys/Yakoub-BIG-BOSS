@@ -265,14 +265,13 @@ export default function Product() {
               {added ? '✓' : t.product.addToCart}
             </button>
 
-            {waLink && (
-              // Some customers will never trust a web form. Give them the
-              // channel they already use, pre-filled (D-200).
-              <a href={waLink} target="_blank" rel="noreferrer" className="btn-secondary">
-                {t.product.orderViaWhatsapp}
-              </a>
-            )}
-          </div>
+            <button
+  type="button"
+  className="btn-secondary"
+  onClick={() => window.location.href = "/checkout"}
+>
+  Commander
+</button></div>
 
           <div className="mt-8">
             <DeliveryEstimator />
