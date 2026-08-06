@@ -68,6 +68,10 @@ export const adminFr = {
     deliveryFee: 'Livraison',
     total: 'Total',
   },
+  delivery: {
+    bureau: 'Bureau',
+    domicile: 'À domicile',
+  },
   home: {
     awaitingConfirmation: 'Commandes à confirmer',
     unreachable: 'Clients injoignables',

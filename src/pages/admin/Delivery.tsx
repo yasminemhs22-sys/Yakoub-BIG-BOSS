@@ -76,7 +76,7 @@ export default function Delivery() {
             </h2>
             <div className="flex flex-wrap items-end gap-3">
               <div>
-                <label className="mb-1.5 block text-xs text-muted">{'Bureau'}</label>
+                <label className="mb-1.5 block text-xs text-muted">{t.delivery?.bureau ?? 'Bureau'}</label>
                 <input
                   className="field w-32"
                   type="number"
@@ -88,7 +88,7 @@ export default function Delivery() {
               </div>
               <div>
                 <label className="mb-1.5 block text-xs text-muted">
-                  {'À domicile'}
+                  {t.delivery?.domicile ?? 'À domicile'}
                 </label>
                 <input
                   className="field w-32"

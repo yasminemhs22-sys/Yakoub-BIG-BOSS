@@ -64,6 +64,11 @@ export const adminAr: AdminDictionary = {
     deliveryFee: 'التوصيل',
     total: 'الإجمالي',
   },
+  delivery: {
+    bureau: 'مكتب التوصيل',
+    domicile: 'توصيل للمنزل',
+  },
+
   home: {
     awaitingConfirmation: 'طلبات بانتظار التأكيد',
     unreachable: 'زبائن لا يردّون',

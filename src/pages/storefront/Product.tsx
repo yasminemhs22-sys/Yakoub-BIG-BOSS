@@ -6,6 +6,7 @@ import { imageSrcSet, imageUrl, SIZES } from '@/lib/image';
 import { useSeo, useJsonLd, productJsonLd } from '@/lib/seo';
 import { SITE_URL } from '@/lib/env';
 import { DeliveryEstimator } from '@/components/storefront/DeliveryEstimator';
+import { QuickOrder } from '@/components/storefront/QuickOrder';
 import { Skeleton } from '@/components/Skeleton';
 import { useI18n, interpolate } from '@/i18n';
 import { useCart } from '@/lib/cart';
@@ -21,6 +22,7 @@ export default function Product() {
   const [sizeId, setSizeId] = useState<string | null>(null);
   const [imageIndex, setImageIndex] = useState(0);
   const [added, setAdded] = useState(false);
+  const [ordering, setOrdering] = useState(false);
 
   const threshold = Number(settings?.['inventory.display_threshold'] ?? 10);
 
@@ -116,7 +118,12 @@ export default function Product() {
   const stock = variant?.stock_on_hand ?? 0;
   const inStock = variant ? stock > 0 : data.variants.some((v) => v.stock_on_hand > 0);
 
-
+  const whatsapp = (settings?.['business.whatsapp'] as string) ?? '';
+  const waLink = whatsapp
+    ? `https://wa.me/213${whatsapp.replace(/^0/, '').replace(/\D/g, '')}?text=${encodeURIComponent(
+        `${name}${variant ? ` (${variant.sku})` : ''}`,
+      )}`
+    : null;
 
   return (
     <main className="mx-auto max-w-content px-4 py-8 pb-28 lg:pb-8">
@@ -246,9 +253,21 @@ export default function Product() {
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
+            {/* Order now is the primary action: most orders here are a single
+                item, and routing one t-shirt through cart -> checkout loses
+                orders a form on this page would have captured. */}
             <button
               type="button"
               className="btn-primary"
+              disabled={!variant || stock <= 0}
+              onClick={() => setOrdering(true)}
+            >
+              {t.product.orderNow}
+            </button>
+
+            <button
+              type="button"
+              className="btn-secondary"
               disabled={!variant || stock <= 0}
               onClick={() => {
                 if (!variant) return;
@@ -260,13 +279,14 @@ export default function Product() {
               {added ? '✓' : t.product.addToCart}
             </button>
 
-            <button
-  type="button"
-  className="btn-secondary"
-  onClick={() => window.location.href = "/checkout"}
->
-  Commander
-</button></div>
+            {waLink && (
+              // Some customers will never trust a web form. Give them the
+              // channel they already use, pre-filled (D-200).
+              <a href={waLink} target="_blank" rel="noreferrer" className="btn-secondary">
+                {t.product.orderViaWhatsapp}
+              </a>
+            )}
+          </div>
 
           <div className="mt-8">
             <DeliveryEstimator />
@@ -294,6 +314,15 @@ export default function Product() {
         </div>
       </div>
 
+      {ordering && (
+        <QuickOrder
+          variantId={variant?.id ?? null}
+          unitPrice={unit}
+          disabled={!variant || stock <= 0}
+          onClose={() => setOrdering(false)}
+        />
+      )}
+
       {/* Sticky order bar on phones: the price and the action stay reachable
           however far the customer has scrolled. */}
       <div className="fixed inset-x-0 bottom-16 z-10 flex items-center gap-3 border-t border-ink-raised bg-ink-surface px-4 py-3 lg:hidden">
@@ -302,9 +331,9 @@ export default function Product() {
           type="button"
           className="btn-primary ms-auto"
           disabled={!variant || stock <= 0}
-          onClick={() => variant && cart.add({ variantId: variant.id, quantity: 1 })}
+          onClick={() => setOrdering(true)}
         >
-          {t.product.addToCart}
+          {t.product.orderNow}
         </button>
       </div>
     </main>
