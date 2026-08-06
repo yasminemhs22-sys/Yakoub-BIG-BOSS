@@ -117,11 +117,6 @@ export default function Product() {
   const inStock = variant ? stock > 0 : data.variants.some((v) => v.stock_on_hand > 0);
 
   const whatsapp = (settings?.['business.whatsapp'] as string) ?? '';
-  const waLink = whatsapp
-    ? `https://wa.me/213${whatsapp.replace(/^0/, '').replace(/\D/g, '')}?text=${encodeURIComponent(
-        `${name}${variant ? ` (${variant.sku})` : ''}`,
-      )}`
-    : null;
 
   return (
     <main className="mx-auto max-w-content px-4 py-8 pb-28 lg:pb-8">
