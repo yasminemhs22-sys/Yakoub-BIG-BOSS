@@ -116,7 +116,7 @@ export default function Product() {
   const stock = variant?.stock_on_hand ?? 0;
   const inStock = variant ? stock > 0 : data.variants.some((v) => v.stock_on_hand > 0);
 
-  const whatsapp = (settings?.['business.whatsapp'] as string) ?? '';
+
 
   return (
     <main className="mx-auto max-w-content px-4 py-8 pb-28 lg:pb-8">
