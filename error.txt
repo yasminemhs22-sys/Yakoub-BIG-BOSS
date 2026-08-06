@@ -1,0 +1,6 @@
+
+> yakoub-big-boss@0.1.0 build
+> tsc -b && vite build
+
+src/pages/admin/Delivery.tsx(79,71): error TS2339: Property 'delivery' does not exist on type '{ signIn: { title: string; subtitle: string; email: string; password: string; submit: string; submitting: string; invalid: string; notStaff: string; backToShop: string; }; shell: { dashboard: string; ... 14 more ...; viewShop: string; }; orders: { ...; }; home: { ...; }; }'.
+src/pages/admin/Delivery.tsx(91,22): error TS2339: Property 'delivery' does not exist on type '{ signIn: { title: string; subtitle: string; email: string; password: string; submit: string; submitting: string; invalid: string; notStaff: string; backToShop: string; }; shell: { dashboard: string; ... 14 more ...; viewShop: string; }; orders: { ...; }; home: { ...; }; }'.

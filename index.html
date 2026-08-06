@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0A0A0A" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>YAKOUB BIG BOSS</title>
+
+    <!--
+      Locale is resolved BEFORE first paint.
+
+      Without this, the page renders in French LTR and then snaps to Arabic RTL
+      once React boots — a visible flash, and a jarring one because the whole
+      layout mirrors. Reading localStorage here costs under a millisecond and
+      removes the flash entirely (D-097, D-098).
+
+      Kept deliberately tiny and dependency-free: it runs before anything else.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('ybb.locale');
+          var locale =
+            stored === 'ar' || stored === 'fr'
+              ? stored
+              : (navigator.language || 'fr').toLowerCase().indexOf('ar') === 0
+                ? 'ar'
+                : 'fr';
+          var html = document.documentElement;
+          html.lang = locale;
+          html.dir = locale === 'ar' ? 'rtl' : 'ltr';
+        } catch (e) {
+          /* Private mode blocks localStorage. French LTR is the safe default. */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <div style="padding: 2rem; font-family: system-ui; color: #fff; background: #0a0a0a">
+        <p>Ce site nécessite JavaScript. / هذا الموقع يحتاج جافاسكريبت.</p>
+        <p>Contact / اتصل: 0563876210</p>
+      </div>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

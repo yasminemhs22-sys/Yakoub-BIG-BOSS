@@ -1,0 +1,80 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[edge_functions]]
+  function = "seo-meta"
+  path = "/*"
+
+# Drains the Google Sheets queue every 5 minutes.
+#
+# Deliberately NOT triggered by order confirmation: a synchronous call would
+# make the admin wait on Google, and a Google outage would then look like a
+# broken confirm button. The queue absorbs that entirely (D-155).
+[functions."sheets-sync"]
+  schedule = "*/5 * * * *"
+
+# Generated, not static: the sitemap follows the CMS, and robots.txt follows
+# SITE_URL and the deploy context.
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/sitemap"
+  status = 200
+
+[[redirects]]
+  from = "/robots.txt"
+  to = "/.netlify/functions/robots"
+  status = 200
+
+# SPA fallback. The edge function injects crawler metadata before this HTML
+# leaves the edge (C-02 / D-172).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), payment=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Cross-Origin-Opener-Policy = "same-origin"
+
+    # Content Security Policy.
+    #
+    # The CMS stores typed blocks, never raw HTML (D-133), so there is no
+    # legitimate reason for the page to execute injected script. This turns that
+    # design decision into an enforced boundary.
+    #
+    # 'unsafe-inline' on style-src is required by Tailwind's arbitrary values
+    # and the inline overlay opacity in the hero block. script-src carries no
+    # such exception: the only inline script is the locale bootstrap in
+    # index.html, which is why 'unsafe-inline' appears there and nowhere else.
+    # Removing it needs a nonce, which needs SSR — revisit with prerendering.
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co; font-src 'self'; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+
+# Fonts and hashed assets are immutable; cache them hard.
+[[headers]]
+  for = "/*/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-store, private"
+
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

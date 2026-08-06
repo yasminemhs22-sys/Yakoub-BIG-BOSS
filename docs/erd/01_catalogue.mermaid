@@ -1,0 +1,89 @@
+erDiagram
+    CATEGORIES ||--o{ CATEGORIES : "parent of"
+    CATEGORIES ||--o{ PRODUCT_CATEGORIES : "classifies"
+    PRODUCTS   ||--o{ PRODUCT_CATEGORIES : "classified by"
+    PRODUCTS   ||--o{ PRODUCT_MEDIA : "shows"
+    PRODUCTS   ||--o{ PRODUCT_VARIANTS : "sold as"
+    MEDIA      ||--o{ PRODUCT_MEDIA : "used in"
+    MEDIA      |o--o{ CATEGORIES : "illustrates"
+    COLORS     |o--o{ PRODUCT_VARIANTS : "colours"
+    SIZES      |o--o{ PRODUCT_VARIANTS : "sizes"
+    PRODUCT_MEDIA |o--o{ PRODUCT_VARIANTS : "variant image"
+
+    CATEGORIES {
+        uuid id PK
+        uuid parent_id FK "nullable, cycle-guarded"
+        text slug UK
+        text name_fr
+        text name_ar
+        uuid media_id FK "nullable"
+        int sort_order
+        bool is_visible
+    }
+
+    PRODUCTS {
+        uuid id PK
+        text slug UK
+        text name_fr
+        text name_ar
+        numeric original_price "required"
+        numeric sale_price "nullable, must be lower"
+        bool is_published
+        timestamptz published_at
+        uuid created_by FK "nullable"
+    }
+
+    PRODUCT_CATEGORIES {
+        uuid product_id PK_FK
+        uuid category_id PK_FK
+        bool is_primary "unique per product"
+        int sort_order
+    }
+
+    COLORS {
+        uuid id PK
+        text name_fr UK
+        text name_ar
+        text hex_value "#RRGGBB"
+        bool is_active
+    }
+
+    SIZES {
+        uuid id PK
+        text label_fr
+        text label_ar
+        text size_group "alpha|numeric|one_size|custom"
+        int sort_order
+        bool is_active
+    }
+
+    PRODUCT_MEDIA {
+        uuid id PK
+        uuid product_id FK
+        uuid media_id FK
+        int sort_order "drag and drop"
+        bool is_featured "exactly one per product"
+    }
+
+    PRODUCT_VARIANTS {
+        uuid id PK
+        uuid product_id FK
+        uuid color_id FK "NULLABLE"
+        uuid size_id FK "NULLABLE"
+        text sku UK
+        bool sku_is_custom
+        numeric price_adjustment
+        uuid product_media_id FK "nullable"
+        text barcode "reserved"
+        int stock_on_hand "cache of ledger"
+        bool is_active
+    }
+
+    MEDIA {
+        uuid id PK
+        text storage_path UK
+        text media_type "image|video"
+        text mime_type
+        text alt_fr
+        text alt_ar
+    }

@@ -1,0 +1,82 @@
+/**
+ * Dashboard strings, kept separate from the storefront dictionary.
+ *
+ * The admin bundle must never ship to storefront visitors (D-232), and that
+ * includes its text. Splitting the dictionary keeps the split honest.
+ */
+export const adminFr = {
+  signIn: {
+    title: 'Espace administrateur',
+    subtitle: 'Réservé au personnel de YAKOUB BIG BOSS',
+    email: 'Adresse e-mail',
+    password: 'Mot de passe',
+    submit: 'Se connecter',
+    submitting: 'Connexion',
+    invalid: 'E-mail ou mot de passe incorrect',
+    notStaff: "Ce compte n'a pas accès au tableau de bord",
+    backToShop: 'Retour à la boutique',
+  },
+  shell: {
+    dashboard: 'Tableau de bord',
+    orders: 'Commandes',
+    catalogue: 'Catalogue',
+    inventory: 'Stock',
+    content: 'Contenu',
+    delivery: 'Livraison',
+    settings: 'Paramètres',
+    access: 'Accès',
+    audit: 'Journal',
+    taxonomy: 'Catégories & tailles',
+    media: 'Médiathèque',
+    security: 'Sécurité',
+    integrations: 'Google Sheets',
+    signOut: 'Se déconnecter',
+    signedInAs: 'Connecté en tant que',
+    viewShop: 'Voir la boutique',
+  },
+  orders: {
+    all: 'Toutes',
+    search: 'Référence ou téléphone',
+    empty: 'Aucune commande.',
+    customer: 'Client',
+    call: 'Appeler',
+    confirm: 'Confirmer la commande',
+    confirming: 'Confirmation…',
+    noteOptional: 'Note (facultatif)',
+    noteRequired: 'Une note est obligatoire',
+    addCallAttempt: 'Enregistrer un appel',
+    addNote: 'Ajouter une note',
+    timeline: 'Historique',
+    items: 'Articles',
+    shipping: 'Expédition',
+    company: 'Transporteur',
+    tracking: 'Numéro de suivi',
+    shippedAt: 'Date d’expédition',
+    estimatedAt: 'Livraison estimée',
+    feeOverride: 'Frais négociés',
+    saveShipping: 'Enregistrer l’expédition',
+    changeStatus: 'Changer le statut',
+    insufficientStock: 'Stock insuffisant',
+    oversell: 'Confirmer malgré le stock',
+    oversellWarning: 'Le stock deviendra négatif. Une note est obligatoire.',
+    alreadyConfirmed: 'Commande déjà confirmée.',
+    illegalTransition: 'Ce changement de statut n’est pas autorisé.',
+    variantMissing: 'Un article n’existe plus. Impossible de confirmer.',
+    retryDue: 'À rappeler',
+    attempts: 'tentatives',
+    subtotal: 'Sous-total',
+    deliveryFee: 'Livraison',
+    total: 'Total',
+  },
+  home: {
+    awaitingConfirmation: 'Commandes à confirmer',
+    unreachable: 'Clients injoignables',
+    lowStock: 'Stock faible',
+    todayRevenue: "Encaissé aujourd'hui",
+    nothingToDo: 'Rien à traiter pour le moment.',
+    comingPhase: 'Disponible à la phase suivante',
+  },
+};
+
+// No `as const` — see the note in fr.ts.
+export type AdminDictionary = typeof adminFr;

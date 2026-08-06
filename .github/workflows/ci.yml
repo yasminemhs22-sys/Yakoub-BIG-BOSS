@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      # Types before lint: a type error usually explains several lint errors.
+      - run: npm run typecheck
+      - run: npm run lint
+
+      - run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: placeholder-anon-key-for-build-only
+          VITE_SITE_URL: https://example.com
+
+      # The storefront JS budget is 200KB gzipped (D-231). Fail the build rather
+      # than discover a regression on a 3G phone in Boumerdès.
+      - name: Check bundle budget
+        run: |
+          TOTAL=$(find dist/assets -name '*.js' -exec gzip -c {} \; | wc -c)
+          echo "Total gzipped JS: $TOTAL bytes"
+          if [ "$TOTAL" -gt 204800 ]; then
+            echo "::error::Bundle exceeds the 200KB gzipped budget"
+            exit 1
+          fi
+
+      # No secret may ever be bundled into client code.
+      - name: Guard against leaked secrets
+        run: |
+          if grep -rIl "service_role" dist/ 2>/dev/null; then
+            echo "::error::service_role reference found in build output"
+            exit 1
+          fi
+          if grep -rIlE "GOOGLE_SERVICE_ACCOUNT|SYNC_SECRET" dist/ 2>/dev/null; then
+            echo "::error::server secret found in build output"
+            exit 1
+          fi
+
+      # The static checks that encode the architectural rules: no prices in the
+      # cart, no direct status or stock writes, no admin code in the storefront,
+      # no server secrets imported into src/.
+      - name: Architecture rules
+        run: python3 scripts/check-frontend.py
+
+      - name: Migration integrity
+        run: python3 scripts/check-migrations.py

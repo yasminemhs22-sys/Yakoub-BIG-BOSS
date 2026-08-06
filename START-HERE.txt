@@ -1,0 +1,53 @@
+YAKOUB BIG BOSS - production package v1.2
+=========================================
+
+STEP 1  INSTALL
+    npm install
+    copy .env.example to .env, fill in 3 values
+    npm run typecheck        must show 0 errors
+    npm run dev
+
+STEP 2  DATABASE  (Supabase SQL Editor, in this order)
+    sql-bundles/DATABASE_COMPLETE.sql    schema + system data
+    sql-bundles/SEED_EVERYTHING.sql      58 wilayas, prices, categories,
+                                         sizes, colours, homepage blocks
+
+    After these two, the site is no longer empty: the homepage has content,
+    checkout has all 58 wilayas, and every wilaya has a delivery price.
+
+STEP 3  ADMIN ACCOUNT
+    Supabase > Authentication > Users > Add user (tick Auto Confirm)
+    then in the SQL Editor:
+
+    insert into public.admin_users (id, role_id, full_name, email)
+    select u.id, (select id from public.roles where code='super_admin'),
+           initcap(split_part(u.email,'@',1)), u.email
+    from auth.users u on conflict (id) do nothing;
+
+STEP 4  YOUR CONTENT  (dashboard at /fr/admin)
+    Contenu > Mediatheque    upload the logo and storefront photo
+    Contenu                  write the legal pages, then publish them
+    Catalogue                add products, images, variants, stock
+    Livraison                replace the starting prices with yours
+    Parametres               email, opening hours, map link
+
+WHAT IS DELIBERATELY NOT SEEDED
+    Products and images - yours, added from the dashboard
+    Communes            - 58 capitals only, NOT all 1,541. Add the ones you
+                          deliver to. A wrong commune name is an undeliverable
+                          parcel, so none were invented.
+    Fonts               - 4 files, see docs/FONTS.md
+
+BEFORE PRODUCTION
+    supabase/tests/                          run 00 then 01-04
+    supabase/tests/05_concurrency_MANUAL.md  MANDATORY, still unverified
+    select * from public.security_audit;     must return zero rows
+    Confirm wilaya codes with your delivery company
+    Change the test admin password
+
+DOCS
+    docs/DEPLOYMENT.md            step by step
+    docs/RUNBOOK_OPERATIONS.md    backups, security, incidents
+    docs/BEHANCE.md               case study + shot list
+    docs/SPECIFICATION.md         requirements
+    docs/DECISIONS.md             199 decisions

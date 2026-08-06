@@ -1,0 +1,69 @@
+erDiagram
+    %% ================= GEOGRAPHY & DELIVERY =================
+    WILAYAS            ||--o{ COMMUNES            : "contains"
+    WILAYAS            ||--o{ DELIVERY_PRICES     : "priced for"
+    COMMUNES           |o--o{ DELIVERY_PRICES     : "optional override"
+    DELIVERY_METHODS   ||--o{ DELIVERY_PRICES     : "priced by"
+    WILAYAS            ||--o{ ORDERS              : "ships to"
+    COMMUNES           ||--o{ ORDERS              : "ships to"
+    DELIVERY_METHODS   ||--o{ ORDERS              : "delivered via"
+    DELIVERY_COMPANIES |o--o{ ORDERS              : "carried by"
+
+    %% ================= IDENTITY & ACCESS =================
+    AUTH_USERS         ||--|| ADMIN_USERS         : "is"
+    ROLES              ||--o{ ADMIN_USERS         : "assigned to"
+    ROLES              ||--o{ ROLE_PERMISSIONS    : "grants"
+    PERMISSIONS        ||--o{ ROLE_PERMISSIONS    : "granted by"
+    ADMIN_USERS        |o--o{ AUDIT_LOG           : "acted"
+    ADMIN_USERS        |o--o{ ORDER_TIMELINE      : "acted"
+    ADMIN_USERS        |o--o{ STOCK_MOVEMENTS     : "acted"
+    ADMIN_USERS        |o--o{ ORDERS              : "confirmed"
+    ADMIN_USERS        |o--o{ PHONE_BLOCKLIST     : "blocked"
+    ADMIN_USERS        |o--o{ PRODUCTS            : "created"
+    ADMIN_USERS        |o--o{ MEDIA               : "uploaded"
+    ADMIN_USERS        |o--o{ SETTINGS            : "updated"
+    ADMIN_USERS        |o--o{ BUILD_REQUESTS      : "requested"
+
+    %% ================= CMS =================
+    PAGES              ||--o{ CONTENT_BLOCKS      : "composed of"
+    MEDIA              |o--o{ PAGES               : "og image"
+    MENUS              ||--o{ MENU_ITEMS          : "contains"
+    MENU_ITEMS         |o--o{ MENU_ITEMS          : "nests"
+    PAGES              |o--o{ MENU_ITEMS          : "links to"
+    CATEGORIES         |o--o{ MENU_ITEMS          : "links to"
+
+    %% ================= CATALOGUE =================
+    CATEGORIES         |o--o{ CATEGORIES          : "parent of"
+    MEDIA              |o--o{ CATEGORIES          : "illustrates"
+    PRODUCTS           ||--o{ PRODUCT_CATEGORIES  : "classified by"
+    CATEGORIES         ||--o{ PRODUCT_CATEGORIES  : "classifies"
+    PRODUCTS           ||--o{ PRODUCT_MEDIA       : "shows"
+    MEDIA              ||--o{ PRODUCT_MEDIA       : "used in"
+    PRODUCTS           ||--o{ PRODUCT_VARIANTS    : "sold as"
+    COLORS             |o--o{ PRODUCT_VARIANTS    : "colours"
+    SIZES              |o--o{ PRODUCT_VARIANTS    : "sizes"
+    PRODUCT_MEDIA      |o--o{ PRODUCT_VARIANTS    : "variant image"
+
+    %% ================= INVENTORY =================
+    PRODUCT_VARIANTS   ||--o{ STOCK_MOVEMENTS     : "ledger of"
+    ORDERS             |o--o{ STOCK_MOVEMENTS     : "caused"
+
+    %% ================= ORDERS =================
+    ORDER_STATUSES     ||--o{ ORDERS              : "state of"
+    ORDER_STATUSES     |o--o{ ORDER_STATUS_TRANSITIONS : "from"
+    ORDER_STATUSES     ||--o{ ORDER_STATUS_TRANSITIONS : "to"
+    ORDER_STATUSES     |o--o{ ORDER_TIMELINE      : "recorded"
+    ORDERS             ||--|{ ORDER_ITEMS         : "contains"
+    PRODUCT_VARIANTS   |o--o{ ORDER_ITEMS         : "snapshot of"
+    ORDERS             ||--o{ ORDER_TIMELINE      : "history of"
+
+    %% ================= OPERATIONS =================
+    ORDERS             ||--o| SHEETS_SYNC_QUEUE   : "mirrored to"
+
+    %% ================= STANDALONE =================
+    ORDER_SUBMISSION_LOG {
+        bigint id PK
+        inet ip
+        text phone_e164
+        boolean succeeded
+    }

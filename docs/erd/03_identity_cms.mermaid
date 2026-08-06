@@ -1,0 +1,116 @@
+erDiagram
+    AUTH_USERS ||--|| ADMIN_USERS : "is"
+    ROLES ||--o{ ADMIN_USERS : "assigned to"
+    ROLES ||--o{ ROLE_PERMISSIONS : "grants"
+    PERMISSIONS ||--o{ ROLE_PERMISSIONS : "granted by"
+    ADMIN_USERS |o--o{ AUDIT_LOG : "acted"
+    ADMIN_USERS |o--o{ SETTINGS : "updated"
+    ADMIN_USERS |o--o{ MEDIA : "uploaded"
+    ADMIN_USERS |o--o{ BUILD_REQUESTS : "requested"
+    PAGES ||--o{ CONTENT_BLOCKS : "composed of"
+    MEDIA |o--o{ PAGES : "og image"
+    MENUS ||--o{ MENU_ITEMS : "contains"
+    MENU_ITEMS |o--o{ MENU_ITEMS : "nests"
+    PAGES |o--o{ MENU_ITEMS : "links to"
+    CATEGORIES |o--o{ MENU_ITEMS : "links to"
+
+    AUTH_USERS {
+        uuid id PK "Supabase Auth, STAFF ONLY"
+    }
+
+    ADMIN_USERS {
+        uuid id PK_FK "= auth.users.id"
+        uuid role_id FK
+        text full_name
+        text email
+        bool is_active "guard: last super admin"
+    }
+
+    ROLES {
+        uuid id PK
+        text code UK "super_admin|administrator|content_manager"
+        text name_fr
+        text name_ar
+        bool is_system
+    }
+
+    PERMISSIONS {
+        uuid id PK
+        text code UK "group.action"
+        text group_code
+        text description
+    }
+
+    ROLE_PERMISSIONS {
+        uuid role_id PK_FK
+        uuid permission_id PK_FK
+    }
+
+    AUDIT_LOG {
+        bigint id PK
+        uuid actor_id
+        text action "insert|update|delete"
+        text entity_table
+        text entity_id
+        jsonb before
+        jsonb after
+    }
+
+    SETTINGS {
+        text key PK
+        jsonb value
+        bool is_public "gates anon read"
+        uuid updated_by FK
+    }
+
+    PAGES {
+        uuid id PK
+        text slug UK
+        text page_type "home|standard|legal|contact"
+        text title_fr
+        text title_ar
+        text meta_title_fr
+        text meta_title_ar
+        text meta_description_fr
+        text meta_description_ar
+        uuid og_media_id FK
+        bool is_system
+        bool is_published
+    }
+
+    CONTENT_BLOCKS {
+        uuid id PK
+        uuid page_id FK
+        text block_type "typed, NEVER raw html"
+        int position "unique per page, deferrable"
+        bool is_visible
+        jsonb data "shape validated in app"
+    }
+
+    MENUS {
+        uuid id PK
+        text code UK "main|footer"
+        text name
+    }
+
+    MENU_ITEMS {
+        uuid id PK
+        uuid menu_id FK
+        uuid parent_id FK "nullable, self-nesting"
+        text label_fr
+        text label_ar
+        text link_type "page|category|url"
+        uuid page_id FK "exactly one target"
+        uuid category_id FK "exactly one target"
+        text url "exactly one target"
+        int position
+        bool is_visible
+    }
+
+    BUILD_REQUESTS {
+        bigint id PK
+        text reason
+        uuid requested_by FK
+        text status "pending|triggered|failed|superseded"
+        timestamptz triggered_at
+    }

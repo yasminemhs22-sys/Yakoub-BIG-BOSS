@@ -1,0 +1,136 @@
+erDiagram
+    WILAYAS ||--o{ COMMUNES : "contains"
+    WILAYAS ||--o{ DELIVERY_PRICES : "priced for"
+    COMMUNES |o--o{ DELIVERY_PRICES : "optional override"
+    DELIVERY_METHODS ||--o{ DELIVERY_PRICES : "priced by"
+    WILAYAS ||--o{ ORDERS : "ships to"
+    COMMUNES ||--o{ ORDERS : "ships to"
+    DELIVERY_METHODS ||--o{ ORDERS : "delivered via"
+    DELIVERY_COMPANIES |o--o{ ORDERS : "carried by"
+    ORDER_STATUSES ||--o{ ORDERS : "state of"
+    ORDERS ||--|{ ORDER_ITEMS : "contains"
+    ORDERS ||--o{ ORDER_TIMELINE : "history of"
+    ORDERS |o--o{ STOCK_MOVEMENTS : "caused"
+    ORDERS ||--o| SHEETS_SYNC_QUEUE : "mirrored to"
+    PRODUCT_VARIANTS |o--o{ ORDER_ITEMS : "snapshot of"
+    PRODUCT_VARIANTS ||--o{ STOCK_MOVEMENTS : "ledger of"
+    ORDER_STATUSES |o--o{ ORDER_STATUS_TRANSITIONS : "allowed from"
+    ADMIN_USERS |o--o{ ORDER_TIMELINE : "acted"
+
+    WILAYAS {
+        uuid id PK
+        smallint code UK "1-58, the real identity"
+        text name_fr
+        text name_ar
+        bool is_deep_south
+    }
+
+    COMMUNES {
+        uuid id PK
+        uuid wilaya_id FK
+        text name_fr "unique PER WILAYA"
+        text name_ar "unique PER WILAYA"
+        text post_code
+    }
+
+    DELIVERY_PRICES {
+        uuid id PK
+        uuid wilaya_id FK
+        uuid commune_id FK "NULLABLE, future override"
+        uuid delivery_method_id FK
+        numeric price
+    }
+
+    ORDERS {
+        uuid id PK
+        text reference UK "YBB-YYMMDD-XXXX"
+        uuid status_id FK
+        text first_name
+        text last_name
+        text phone_raw "as typed"
+        text phone_e164 "canonical, indexed"
+        uuid wilaya_id FK
+        uuid commune_id FK
+        uuid delivery_method_id FK
+        text address "required if domicile"
+        text notes
+        numeric subtotal "server-computed"
+        numeric delivery_fee "server-resolved"
+        numeric delivery_fee_override "nullable"
+        numeric total "server-computed"
+        uuid delivery_company_id FK "nullable"
+        text tracking_number
+        date shipped_at
+        date estimated_delivery_at
+        timestamptz confirmed_at
+        uuid confirmed_by FK
+        smallint unreachable_attempts
+        timestamptz next_retry_at
+        inet submitted_ip
+    }
+
+    ORDER_ITEMS {
+        uuid id PK
+        uuid order_id FK
+        uuid variant_id FK "SET NULL - history survives"
+        text product_name_fr "SNAPSHOT"
+        text product_name_ar "SNAPSHOT"
+        text color_name_fr "SNAPSHOT"
+        text size_label_fr "SNAPSHOT"
+        text sku "SNAPSHOT"
+        numeric unit_price "SNAPSHOT"
+        int quantity
+        numeric line_total
+    }
+
+    ORDER_STATUSES {
+        uuid id PK
+        text code UK
+        text label_fr
+        text label_ar
+        bool is_terminal
+        bool decrements_stock
+        bool restores_stock
+    }
+
+    ORDER_STATUS_TRANSITIONS {
+        uuid id PK
+        uuid from_status_id FK "null = initial"
+        uuid to_status_id FK
+    }
+
+    ORDER_TIMELINE {
+        bigint id PK
+        uuid order_id FK
+        uuid actor_id FK "WHO"
+        text event_type
+        uuid from_status_id FK
+        uuid to_status_id FK
+        text note "optional"
+        timestamptz created_at "WHEN"
+    }
+
+    STOCK_MOVEMENTS {
+        bigint id PK
+        uuid variant_id FK
+        text movement_type
+        int quantity_delta "signed, never zero"
+        uuid order_id FK "nullable"
+        uuid actor_id FK "nullable"
+        text note
+    }
+
+    SHEETS_SYNC_QUEUE {
+        bigint id PK
+        uuid order_id FK "UNIQUE - one row per order"
+        text status "pending|processing|done|failed"
+        smallint attempts
+        text last_error
+        jsonb payload
+    }
+
+    PHONE_BLOCKLIST {
+        uuid id PK
+        text phone_e164 UK
+        text reason
+    }
