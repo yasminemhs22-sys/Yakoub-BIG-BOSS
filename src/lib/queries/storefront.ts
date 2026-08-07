@@ -289,8 +289,14 @@ export function useCommunes(wilayaId: string | null) {
         .eq('wilaya_id', wilayaId!)
         .eq('is_active', true)
         .order('name_fr');
+
       if (error) throw error;
-      return data as { id: string; name_fr: string; name_ar: string }[];
+
+      return data as {
+        id: string;
+        name_fr: string;
+        name_ar: string;
+      }[];
     },
     staleTime: Infinity,
   });
