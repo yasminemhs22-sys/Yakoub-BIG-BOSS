@@ -111,7 +111,10 @@ export const handler: Handler = async (event: HandlerEvent) => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(data),
     };
-  } catch {
-    return { statusCode: 200, body: JSON.stringify({ ok: false, reason: 'generic' }) };
-  }
-};
+  } catch (error) {
+  console.error('PLACE_ORDER_ERROR:', error);
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ ok: false, reason: 'generic' }),
+  };
+}
