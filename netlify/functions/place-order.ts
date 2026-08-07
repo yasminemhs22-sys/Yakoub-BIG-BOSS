@@ -92,19 +92,44 @@ export const handler: Handler = async (event: HandlerEvent) => {
     });
 
     if (error) {
-      // Trigger-level rejections (address required, commune/wilaya mismatch)
-      // arrive as errors. Map them to codes the UI already knows, and do not
-      // leak database internals to the browser.
-      const message = error.message ?? '';
-      const reason = message.includes('Address is required')
-        ? 'address_required'
-        : message.includes('Commune')
+  console.error('PLACE_ORDER_SUPABASE_ERROR:', {
+    message: error.message,
+    details: error.details,
+    hint: error.hint,
+    code: error.code,
+  });
+
+  const message = error.message ?? '';
+
+  const reason = message.includes('Address is required')
+    ? 'address_required'
+    : message.includes('Commune')
+      ? 'invalid_destination'
+      : message.includes('Variant unavailable')
+        ? 'variant_unavailable'
+        : message.includes('Wilaya')
           ? 'invalid_destination'
-          : message.includes('Variant unavailable')
-            ? 'variant_unavailable'
+          : message.includes('Delivery method')
+            ? 'invalid_delivery_method'
             : 'generic';
-      return { statusCode: 200, body: JSON.stringify({ ok: false, reason }) };
-    }
+
+  return {
+    statusCode: 200,
+    headers: {
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      ok: false,
+      reason,
+      debug: {
+        code: error.code ?? null,
+        message: error.message ?? null,
+        details: error.details ?? null,
+        hint: error.hint ?? null,
+      },
+    }),
+  };
+}
 
     return {
       statusCode: 200,
