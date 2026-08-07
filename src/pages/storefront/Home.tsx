@@ -5,19 +5,28 @@ import { Skeleton } from '@/components/Skeleton';
 import { useI18n } from '@/i18n';
 import { useSeo, useJsonLd, localBusinessJsonLd } from '@/lib/seo';
 import { useSettings } from '@/lib/queries/settings';
+import { useEffect, useState } from 'react';
 
-/**
- * The homepage is entirely CMS-driven (D-130, D-134).
- *
- * Nothing below is hardcoded: the owner adds, reorders, hides and edits every
- * block from the dashboard. The only fallback is the newest products, shown
- * when no blocks exist yet — so a fresh install is not a blank page.
- */
 export default function Home() {
   const { t, locale, pick } = useI18n();
   const { data, isLoading } = usePageWithBlocks('home');
   const fallback = usePublishedProducts({ limit: 8 });
   const { data: settings } = useSettings();
+
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingTimedOut(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setLoadingTimedOut(true);
+    }, 5000);
+
+    return () => window.clearTimeout(timer);
+  }, [isLoading]);
 
   useSeo({
     title:
@@ -34,11 +43,19 @@ export default function Home() {
     hasArabic: Boolean(data?.page.title_ar?.trim()),
   });
 
-  // LocalBusiness markup is what makes "magasin vetements Boudouaou" find the
-  // shop — the physical store is a real asset, not just a warehouse.
-  useJsonLd('local-business', settings ? localBusinessJsonLd(settings) : null);
+  useJsonLd(
+    'local-business',
+    settings ? localBusinessJsonLd(settings) : null,
+  );
 
-  if (isLoading) {
+  /*
+   * Never keep the entire storefront blocked forever if the CMS request
+   * becomes slow or unavailable.
+   *
+   * After 5 seconds we continue to the product fallback instead of leaving
+   * the customer on an infinite loading screen.
+   */
+  if (isLoading && !loadingTimedOut && !data) {
     return (
       <main>
         <Skeleton className="h-80 w-full" />
@@ -56,7 +73,10 @@ export default function Home() {
   if (!blocks.length) {
     return (
       <main className="mx-auto max-w-content px-4 py-12">
-        <h1 className="font-display text-display-md">{t.nav.newArrivals}</h1>
+        <h1 className="font-display text-display-md">
+          {t.nav.newArrivals}
+        </h1>
+
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {fallback.data?.map((p) => (
             <ProductCard key={p.id} product={p} />
