@@ -45,7 +45,11 @@ export function QuickOrder({
   const [error, setError] = useState<string | null>(null);
 
   const { data: communes } = useCommunes(wilayaId || null);
-  const fee = useResolvedDeliveryFee(wilayaId || null, communeId || null, methodId || null);
+  const fee = useResolvedDeliveryFee(
+  wilayaId || null,
+  communeId || null,
+  methodId || null
+);
 
   // A commune must belong to its wilaya; the database enforces it, so clear the
   // stale choice rather than let the customer hit a rejection.

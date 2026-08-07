@@ -238,12 +238,16 @@ export function usePageWithBlocks(slug: string) {
       if (error) throw error;
       if (!page) return null;
 
-      const { data: blocks } = await supabase
-        .from('content_blocks')
-        .select('id, page_id, block_type, position, is_visible, data')
-        .eq('page_id', (page as { id: string }).id)
-        .eq('is_visible', true)
-        .order('position');
+      const { data: blocks, error: blocksError } = await supabase
+  .from('content_blocks')
+  .select('id, page_id, block_type, position, is_visible, data')
+  .eq('page_id', (page as { id: string }).id)
+  .eq('is_visible', true)
+  .order('position');
+
+if (blocksError) {
+  throw blocksError;
+}
 
       return { page: page as Record<string, string>, blocks: (blocks ?? []) as ContentBlock[] };
     },
