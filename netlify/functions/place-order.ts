@@ -114,7 +114,8 @@ export const handler: Handler = async (event: HandlerEvent) => {
   } catch (error) {
   console.error('PLACE_ORDER_ERROR:', error);
   return {
-    statusCode: 200,
-    body: JSON.stringify({ ok: false, reason: 'generic' }),
-  };
+  statusCode: 200,
+  body: JSON.stringify({ ok: false, reason: 'generic' }),
+};
 }
+};
