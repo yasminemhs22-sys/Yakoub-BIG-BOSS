@@ -59,26 +59,26 @@ function toCard(row: RawProductCard): StorefrontProduct {
   };
 }
 
-export function usePublishedProducts(opts: { limit?: number; categorySlug?: string } = {}) {
-  const { limit = 24, categorySlug } = opts;
+export function usePublishedProducts(
+  opts: { limit?: number; categorySlug?: string } = {},
+) {
+  const { limit = 24 } = opts;
+
   return useQuery({
-    queryKey: ['sf-products', limit, categorySlug ?? null],
+    queryKey: ['sf-products', limit],
+
     queryFn: async (): Promise<StorefrontProduct[]> => {
-      let q = supabase
+      const { data, error } = await supabase
         .from('products')
-        .select(
-          categorySlug
-            ? `${PRODUCT_CARD_SELECT}, product_categories!inner ( categories!inner ( slug ) )`
-            : PRODUCT_CARD_SELECT,
-        )
+        .select(PRODUCT_CARD_SELECT)
         .eq('is_published', true)
         .order('published_at', { ascending: false })
         .limit(limit);
 
-      if (categorySlug) q = q.eq('product_categories.categories.slug', categorySlug);
+      if (error) {
+        throw error;
+      }
 
-      const { data, error } = await q;
-      if (error) throw error;
       return (data as unknown as RawProductCard[]).map(toCard);
     },
   });
