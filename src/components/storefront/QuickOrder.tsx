@@ -84,16 +84,16 @@ export function QuickOrder({
     }
 
     const result = await placeOrder.mutateAsync({
-      firstName,
-      lastName,
-      phone,
-      wilayaId,
-      communeId,
-      methodId,
-      address: address.trim() || undefined,
-      items: [{ variantId, quantity }],
-      honeypot,
-    });
+  firstName,
+  lastName,
+  phone,
+  wilayaId,
+  communeId,
+  methodId,
+  address: address.trim() || undefined,
+  items: [{ variantId, quantity }],
+  honeypot,
+});
 
     if (!result.ok) {
       setError(REASONS[result.reason] ?? t.errors.generic);
