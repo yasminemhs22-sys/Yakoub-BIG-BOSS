@@ -330,7 +330,7 @@ export default function Product() {
         <button
           type="button"
           className="btn-primary ms-auto"
-          disabled={!variant || stock <= 0}
+          disabled={false}
           onClick={() => setOrdering(true)}
         >
           {t.product.orderNow}
